@@ -7,6 +7,7 @@
 #include "bmp180Utils.h"
 #include "adxl377Utils.h"
 #include "mpu9250Utils.h"
+#include <Adafruit_GPS.h>
 
 // Period for timed portion of main loop
 #define MAIN_LOOP_PERIOD_MS 1000 // 1 Hz telemetry updates
@@ -35,6 +36,9 @@ void setup()
   // initialize imu
   mpu9250Init();
 
+  // initialize the gps
+  gpsInit();
+
   // Start temperature and pressure readings
   if(!startBmp180Temp()){
     // TODO: handle error
@@ -53,7 +57,10 @@ void loop()
     checkBmp180TempStatus(); // Check if there's a temperature reading available and record it if so
   } else {
     checkBmp180PressureStatus(); // Check if there's a pressure reading available and record it if so
-  }  
+  }
+
+  // hand-query the gps
+  readGps();
   
   currentTime = millis();
   if (currentTime - lastLoopTime >= MAIN_LOOP_PERIOD_MS){
