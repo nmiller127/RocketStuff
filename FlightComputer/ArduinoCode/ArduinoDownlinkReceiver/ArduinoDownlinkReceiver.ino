@@ -1,5 +1,5 @@
 #include "rfm95Utils.h"
-#include "telemDefines.h"
+#include "../telemDefines.h"
 
 void setup() 
 {

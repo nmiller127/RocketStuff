@@ -1,6 +1,6 @@
 #include <SFE_BMP180.h>
 #include <Wire.h>
-#include "telemDefines.h"
+#include "../telemDefines.h"
 
 #define BMP180_OVERSAMPLE_RES 2 // oversampling setting, from 0 to 3 (3 = highest res, longest wait)
 

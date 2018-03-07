@@ -1,4 +1,4 @@
-#include "telemDefines.h"
+#include "../telemDefines.h"
 
 #define ADXL377_X_PIN A1 // Analog 1
 #define ADXL377_Y_PIN A2 // Analog 2

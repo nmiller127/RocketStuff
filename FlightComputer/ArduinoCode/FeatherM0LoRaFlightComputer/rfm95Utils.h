@@ -1,4 +1,4 @@
-#include "telemDefines.h"
+#include "../telemDefines.h"
 
 /* for feather m0 */ 
 #define RFM95_CS 8

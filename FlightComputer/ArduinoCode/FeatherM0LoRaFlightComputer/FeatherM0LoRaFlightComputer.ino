@@ -1,12 +1,13 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 #include "rfm95Utils.h"
-#include "telemDefines.h"
+#include "../telemDefines.h"
 
 // inclues for sensors
 #include "bmp180Utils.h"
 #include "adxl377Utils.h"
 #include "mpu9250Utils.h"
+#include "gpsUtils.h"
 #include <Adafruit_GPS.h>
 
 // Period for timed portion of main loop
