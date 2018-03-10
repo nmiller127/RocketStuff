@@ -34,15 +34,15 @@ void readMpu9250(){
     totalMx += mx; totalMy += my; totalMz += mz;
   }
   // update main telemetry
-  telem.mpu9250.ax = totalAx / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.ay = totalAy / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.az = totalAz / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.gx = totalGx / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.gy = totalGy / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.gz = totalGz / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.mx = totalMx / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.my = totalMy / MPU9250_NUM_READINGS_PER_AVG;
-  telem.mpu9250.mz = totalMz / MPU9250_NUM_READINGS_PER_AVG;
+  telem.mpu9250.ax = (int16_t)(totalAx / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.ay = (int16_t)(totalAy / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.az = (int16_t)(totalAz / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.gx = (int16_t)(totalGx / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.gy = (int16_t)(totalGy / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.gz = (int16_t)(totalGz / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.mx = (int16_t)(totalMx / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.my = (int16_t)(totalMy / MPU9250_NUM_READINGS_PER_AVG);
+  telem.mpu9250.mz = (int16_t)(totalMz / MPU9250_NUM_READINGS_PER_AVG);
   
   /*imu.getMotion9( &telem.mpu9250.ax, &telem.mpu9250.ay, &telem.mpu9250.az,
                   &telem.mpu9250.gx, &telem.mpu9250.gy, &telem.mpu9250.gz,

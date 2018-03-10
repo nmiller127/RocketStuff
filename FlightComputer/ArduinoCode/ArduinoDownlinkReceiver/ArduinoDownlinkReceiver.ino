@@ -1,6 +1,10 @@
 #include "rfm95Utils.h"
 #include "../telemDefines.h"
 
+// Container for received telemetry
+telemPacket_t receivedPacket;
+uint8_t telemReceiveBuffer[TELEM_PACKET_LEN];
+
 void setup() 
 {
   //while (!Serial);
@@ -18,11 +22,14 @@ void loop()
   if (rf95.available())
   {
     // Should be a message for us now   
-    telemPacket_t receivedPacket = {0};
-    uint8_t len = sizeof(receivedPacket);
+    receivedPacket = {0};
+    uint8_t len = TELEM_PACKET_LEN;
     
-    if (rf95.recv((uint8_t*)&receivedPacket, &len))
+    if (rf95.recv(telemReceiveBuffer, &len))
     {
+      // Deserialize received telemetry
+      deserializeTelemPacket(telemReceiveBuffer, &receivedPacket);
+      
       Serial.print("Packet number "); Serial.print(receivedPacket.packetCount); Serial.println(':');
       Serial.print("Temperature: "); Serial.println(receivedPacket.bmp180.temperature);
       Serial.print("Pressure: "); Serial.println(receivedPacket.bmp180.pressure);

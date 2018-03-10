@@ -13,6 +13,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 // global telemetry container declared in main file
 extern telemPacket_t telem;
+uint8_t serializedTelemBuffer[TELEM_PACKET_LEN];
 
 /*
  * Perform initialization of LoRa radio;
@@ -52,8 +53,11 @@ void initializeRadio(){
  * Sends the current telemetry packet to the receiver
  */
 bool sendTelem(){
+  // serialize telemetry packet
+  serializeTelemPacket(serializedTelemBuffer, &telem);
+
   // this call should block until the radio is ready to send, then send
-  bool result = rf95.send((uint8_t *)&telem, sizeof(telem));
+  bool result = rf95.send(serializedTelemBuffer, TELEM_PACKET_LEN);
   telem.packetCount++;
   
   return result;

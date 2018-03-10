@@ -76,8 +76,11 @@ void loop()
     /********   1 Hz portion of main loop   ********/
 
     // send telemetry
-    sendTelem();
-    Serial.println("Sent a packet");
+    if(sendTelem()){
+      Serial.println("Sent a packet");
+    } else {
+      Serial.println("Send telem failed");
+    }
 
     // update adxl377 values
     readAdxl377();

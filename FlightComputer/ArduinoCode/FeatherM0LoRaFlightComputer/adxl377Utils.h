@@ -9,8 +9,8 @@
 extern telemPacket_t telem;
 
 void adxl377Init(){
-  analogReference(AR_EXTERNAL);  // Set external reference voltage
-                              // (tied to 3v pin on sensor)
+  analogReference(AR_EXTERNAL);   // Set external reference voltage
+                                  // (tied to 3v pin on sensor)
   // Configure input pins
   pinMode(ADXL377_X_PIN, INPUT);
   pinMode(ADXL377_Y_PIN, INPUT);
@@ -23,7 +23,7 @@ double getAdxl377Reading(uint8_t pinNumber){
     analogReading += analogRead(pinNumber);
   }
   //Serial.print("ADXL377 reading: "); Serial.println(analogReading);
-  return (int32_t)(analogReading / ADXL377_NUM_READINGS_PER_AVG);
+  return analogReading / ADXL377_NUM_READINGS_PER_AVG;
 }
 
 void readAdxl377(){

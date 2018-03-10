@@ -59,7 +59,7 @@ bool startBmp180Pressure(){
     double readValue = 0.0;
     char successfulRead = bmp180.getTemperature(readValue);                     // read the temperature value
     if(successfulRead){
-      telem.bmp180.temperature = (int32_t)readValue;                            // store in telemetry if read succeeds 
+      telem.bmp180.temperature = (int16_t)(readValue * 10);                     // store in telemetry (10ths of a degree c) if read succeeds 
     }
     // TODO: else handle error
     if(!startBmp180Pressure()){                                                 // start a pressure reading
@@ -78,7 +78,7 @@ bool startBmp180Pressure(){
     double previousTemp = (double)telem.bmp180.temperature;
     char successfulRead = bmp180.getPressure(readValue, previousTemp);              // read the pressure value
     if(successfulRead){
-      telem.bmp180.pressure = (uint32_t)readValue;                                  // store in telemetry if read succeeds 
+      telem.bmp180.pressure = (uint32_t)(readValue * 100);                          // convert hPa to Pa and store in telemetry if read succeeds 
     }
     // TODO: else handle error
     if(!startBmp180Temp()){                                                         // start another pressure reading
