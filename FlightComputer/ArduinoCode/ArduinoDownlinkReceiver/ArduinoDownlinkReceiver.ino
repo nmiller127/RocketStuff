@@ -1,15 +1,26 @@
 #include "rfm95Utils.h"
 #include "../telemDefines.h"
+#include "SoftwareSerial.h"
+
 
 // Container for received telemetry
 telemPacket_t receivedPacket;
 uint8_t telemReceiveBuffer[TELEM_PACKET_LEN];
 
+// Template for NMEA GGA sentence
+//char nmeaRxBuf[NMEA_BUFFER_LEN] = {0}; TODO: remove
+
+SoftwareSerial gpsSerial(5,6);   // (TODO: assign pins) For spoofed GPS output
+uint32_t lastGpsTxTime;
+uint32_t currentTime;
+
 void setup() 
 {
-  //while (!Serial);
   Serial.begin(9600);
   delay(100);
+  gpsSerial.begin(9600);
+  delay(100);
+  lastGpsTxTime = 0;
 
   // Initialize the rfm95
   initializeRadio();
@@ -42,11 +53,46 @@ void loop()
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
       Serial.println("");
+
+      // Print the latest nmea sentence over the gpsSerial output
+      printNmea(&receivedPacket);
     }
     else
     {
       Serial.println("Receive failed");
     }
     Serial.println("Listening for telemetry...");
+  }
+/* TODO: remove
+  currentTime = millis();
+  if (currentTime >= lastGpsTxTime + 1000)
+  {
+    gpsSerial.println(gpsSentence);
+    lastGpsTxTime = currentTime;
+  }*/
+}
+
+/*
+ * Prints the nmea sentence out of the telem packet
+ * pointed to by telem over the gpsSerial output
+ */
+void printNmea(telemPacket_t* telem){
+  for (size_t i = 0; i < NMEA_BUFFER_LEN; ++i){
+    // local pointer to received nmea sentence
+    char* nmea = telem->gps.nmea;
+    
+    // check for null terminator
+    /*if (nmea[i] == '\0'){
+      break;
+    }*/
+
+    // Print next char
+    gpsSerial.print(nmea[i]);
+
+    // Check if that was the end of the sentence
+    if (i >= 2 && nmea[i-2] == '*') {
+      gpsSerial.println(""); // newline
+      break;
+    }
   }
 }

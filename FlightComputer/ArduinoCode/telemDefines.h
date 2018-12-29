@@ -1,6 +1,8 @@
 #ifndef TELEM_DEFINES_H
 #define TELEM_DEFINES_H
 
+#define NMEA_BUFFER_LEN 82
+
 //#pragma pack(1) <- this may cause death
 
 // temperature/pressure
@@ -35,16 +37,21 @@ typedef struct {
 } mpu9250Telem_t;
 #define MPU9250_TELEM_LEN 2 * 3 * 3
 
+// GPS info
+typedef struct {
+  char nmea[NMEA_BUFFER_LEN];
+} gpsTelem_t;
+#define GPS_TELEM_LEN NMEA_BUFFER_LEN
+
 // main telemetry packet
 typedef struct {
-  uint32_t packetCount;
-  bmp180Telem_t bmp180;
+  uint32_t       packetCount;
+  bmp180Telem_t  bmp180;
   adxl377Telem_t adxl377;
   mpu9250Telem_t mpu9250;
+  gpsTelem_t     gps;
 } telemPacket_t;
-#define TELEM_PACKET_LEN 4 + BMP180_TELEM_LEN + ADXL377_TELEM_LEN + MPU9250_TELEM_LEN
-
-// TODO: implement serialization/deserialization functions rather than making everything 4 bytes wide
+#define TELEM_PACKET_LEN 4 + BMP180_TELEM_LEN + ADXL377_TELEM_LEN + MPU9250_TELEM_LEN + GPS_TELEM_LEN
 
 /****************   Serialization helper functions    ****************/
 
@@ -93,6 +100,13 @@ void serializeMpu9250Telem(uint8_t *& buf, mpu9250Telem_t* mpu9250){
   buf += 2;
 }
 
+void serializeGpsTelem(uint8_t *& buf, gpsTelem_t* gps){
+  for(size_t i = 0; i < GPS_TELEM_LEN; ++i){
+    *(buf + i) = gps->nmea[i];
+  }
+  buf += GPS_TELEM_LEN;
+}
+
 void serializeTelemPacket(uint8_t* buf, telemPacket_t* telem){
   uint8_t* iterator = buf;
   int32ToBytes(iterator, telem->packetCount);
@@ -100,6 +114,7 @@ void serializeTelemPacket(uint8_t* buf, telemPacket_t* telem){
   serializeBmp180Telem(iterator, &(telem->bmp180));
   serializeAdxl377Telem(iterator, &(telem->adxl377));
   serializeMpu9250Telem(iterator, &(telem->mpu9250));
+  serializeGpsTelem(iterator, &(telem->gps));
 }
 
 /****************   Deserialization helper functions    ****************/
@@ -118,11 +133,11 @@ int32_t int32FromBytes(uint8_t* buf){
   int32_t result = 0;
   result |= *buf;
   result <<= 8;
-  result |= *(buf + 1);
+  result |= *(buf + 1) & 0xff;
   result <<= 8;
-  result |= *(buf + 2);
+  result |= *(buf + 2) & 0xff;
   result <<= 8;
-  result |= *(buf + 3);
+  result |= *(buf + 3) & 0xff;
   return result;
 }
 
@@ -154,6 +169,13 @@ void deserializeMpu9250Telem(uint8_t *& buf, mpu9250Telem_t* mpu9250){
   buf += 2;
 }
 
+void deserializeGpsTelem(uint8_t *& buf, gpsTelem_t* gps){
+  for(size_t i = 0; i < GPS_TELEM_LEN; ++i){
+    gps->nmea[i] = *(buf + i);
+  }
+  buf += GPS_TELEM_LEN;
+}
+
 void deserializeTelemPacket(uint8_t * buf, telemPacket_t* telem){
   uint8_t* iterator = buf;
   telem->packetCount = (uint32_t)int32FromBytes(buf);
@@ -161,6 +183,7 @@ void deserializeTelemPacket(uint8_t * buf, telemPacket_t* telem){
   deserializeBmp180Telem(iterator, &(telem->bmp180));
   deserializeAdxl377Telem(iterator, &(telem->adxl377));
   deserializeMpu9250Telem(iterator, &(telem->mpu9250));
+  deserializeGpsTelem(iterator, &(telem->gps));
 }
 
 #endif // TELEM_DEFINES_H

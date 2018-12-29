@@ -53,6 +53,7 @@ void initializeRadio(){
  * Sends the current telemetry packet to the receiver
  */
 bool sendTelem(){
+
   // serialize telemetry packet
   serializeTelemPacket(serializedTelemBuffer, &telem);
 

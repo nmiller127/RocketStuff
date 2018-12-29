@@ -1,3 +1,4 @@
+#include <Adafruit_SleepyDog.h>
 #include <SPI.h>
 #include <RH_RF95.h>
 #include "rfm95Utils.h"
@@ -10,6 +11,8 @@
 #include "gpsUtils.h"
 #include <Adafruit_GPS.h>
 
+// Timeout period for watchdog timer
+#define WATCHDOG_TIMEOUT_MS 2000 // 2s timeout
 // Period for timed portion of main loop
 #define MAIN_LOOP_PERIOD_MS 1000 // 1 Hz telemetry updates
 
@@ -28,7 +31,6 @@ void setup()
   // initialize bmp180 object
   if(!bmp180.begin()){
     Serial.println("BMP180 initialization failed");
-    //while(1); // TODO: replace with something better
   }
 
   // initialize coarse accelerometer
@@ -44,6 +46,14 @@ void setup()
   if(!startBmp180Temp()){
     // TODO: handle error
     Serial.println("BMP180 start temperature failed");
+  }
+
+  // Configure watchdog timer
+  int watchdogPeriodMs = Watchdog.enable(WATCHDOG_TIMEOUT_MS);
+  if(watchdogPeriodMs != WATCHDOG_TIMEOUT_MS){
+    Serial.print("ERROR: watchdog config failed - value "); Serial.println(watchdogPeriodMs);
+  } else {
+  	Serial.println("Watchdog config success");
   }
 }
 
@@ -65,15 +75,16 @@ void loop()
   
   currentTime = millis();
   if (currentTime - lastLoopTime >= MAIN_LOOP_PERIOD_MS){
+    
+    /********   1 Hz portion of main loop   ********/
+    lastLoopTime = currentTime;
+
     // TODO: remove before flight
     int32_t diff = currentTime - lastLoopTime;
     if(diff > MAIN_LOOP_PERIOD_MS){
       Serial.print("Warning: missed main loop timing taget by "); Serial.print(diff - MAIN_LOOP_PERIOD_MS); Serial.println(" ms.");
     }
     // end RBF
-    lastLoopTime = currentTime;
-    
-    /********   1 Hz portion of main loop   ********/
 
     // send telemetry
     if(sendTelem()){
@@ -87,6 +98,9 @@ void loop()
 
     // update mpu9250 values
     readMpu9250();
+
+    // Pet the watchdog
+    Watchdog.reset();
   }
 }
  

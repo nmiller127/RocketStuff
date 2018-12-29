@@ -15,6 +15,7 @@ typedef struct {
   uint8_t tempTimeToWait;
   bool tempInProgress;
   bool pressureInProgress;
+  double previousTemp;
 } bmp180Context_t;
 
 // bmp180 context info
@@ -59,7 +60,8 @@ bool startBmp180Pressure(){
     double readValue = 0.0;
     char successfulRead = bmp180.getTemperature(readValue);                     // read the temperature value
     if(successfulRead){
-      telem.bmp180.temperature = (int16_t)(readValue * 10);                     // store in telemetry (10ths of a degree c) if read succeeds 
+      telem.bmp180.temperature = (int16_t)(readValue * 10);                     // store in telemetry (10ths of a degree c) if read succeeds
+      bmp180Context.previousTemp = readValue;                                   // store raw value in context struct for pressure reading
     }
     // TODO: else handle error
     if(!startBmp180Pressure()){                                                 // start a pressure reading
@@ -75,13 +77,12 @@ bool startBmp180Pressure(){
  void checkBmp180PressureStatus(){
   if(millis() - bmp180Context.pressureStartTime > bmp180Context.pressureTimeToWait){ // if a pressure reading is ready
     double readValue = 0.0;
-    double previousTemp = (double)telem.bmp180.temperature;
-    char successfulRead = bmp180.getPressure(readValue, previousTemp);              // read the pressure value
+    char successfulRead = bmp180.getPressure(readValue, bmp180Context.previousTemp); // read the pressure value
     if(successfulRead){
-      telem.bmp180.pressure = (uint32_t)(readValue * 100);                          // convert hPa to Pa and store in telemetry if read succeeds 
+      telem.bmp180.pressure = (uint32_t)(readValue * 100);                           // convert hPa to Pa and store in telemetry if read succeeds 
     }
     // TODO: else handle error
-    if(!startBmp180Temp()){                                                         // start another pressure reading
+    if(!startBmp180Temp()){                                                          // start another pressure reading
       // TODO: handle error
       Serial.println("BMP180 start temperature failed");
     }
