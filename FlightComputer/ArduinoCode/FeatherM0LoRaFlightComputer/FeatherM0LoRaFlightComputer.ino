@@ -16,6 +16,8 @@
 // Period for timed portion of main loop
 #define MAIN_LOOP_PERIOD_MS 1000 // 1 Hz telemetry updates
 
+bool watchdogEnabled = false;
+
 telemPacket_t telem = {0};  // main telemetry container
 
 void setup() 
@@ -54,6 +56,7 @@ void setup()
     Serial.print("ERROR: watchdog config failed - value "); Serial.println(watchdogPeriodMs);
   } else {
   	Serial.println("Watchdog config success");
+  	watchdogEnabled = true;
   }
 }
 
@@ -90,7 +93,7 @@ void loop()
     if(sendTelem()){
       Serial.println("Sent a packet");
     } else {
-      Serial.println("Send telem failed");
+      fatalError("Send telem failed");
     }
 
     // update adxl377 values
@@ -102,5 +105,16 @@ void loop()
     // Pet the watchdog
     Watchdog.reset();
   }
+}
+
+/*
+ * Print error message and trigger watchdog reset
+ */
+void fatalError(char* message){
+	Serial.print(message);
+
+	if (watchdogEnabled){
+	    while(true); // Wait for watchdog reset
+	}
 }
  
